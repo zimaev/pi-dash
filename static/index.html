@@ -751,12 +751,8 @@ function renderTopProcesses(top){
   }
 }
 
-/* ========== POLL: System Stats ========== */
-async function pollStats(){
-  const res = await fetch('/api/stats', {cache:'no-store'});
-  if (!res.ok) throw new Error('bad status');
-  const d = await res.json();
-
+/* ========== POLL: Fast Stats ========== */
+function renderFastStats(d){
   document.getElementById('hostname').textContent = d.hostname;
   document.getElementById('uptime').textContent = 'uptime ' + fmtUptime(d.uptime);
   document.getElementById('v-uptime').textContent = fmtUptime(d.uptime);
@@ -782,9 +778,10 @@ async function pollStats(){
 
   document.getElementById('v-rx').textContent = fmtBytesPerSec(d.net_rx);
   document.getElementById('v-tx').textContent = fmtBytesPerSec(d.net_tx);
-
   renderCores(d.cpu_per_core);
+}
 
+function renderSlowStats(d){
   document.getElementById('disk-fill').style.width = d.disk_percent + '%';
   document.getElementById('disk-used').textContent = `${fmtBytes(d.disk_used)} / ${fmtBytes(d.disk_total)}`;
   document.getElementById('disk-pct').textContent = d.disk_percent.toFixed(0) + '%';
@@ -797,6 +794,20 @@ async function pollStats(){
   renderPhysicalDisks(d.physical_disks || []);
   renderInterfaces(d.interfaces || []);
   renderTopProcesses(d.top_processes || {});
+}
+
+async function pollStatsFast(){
+  const res = await fetch('/api/stats/fast', {cache:'no-store'});
+  if (!res.ok) throw new Error('bad status');
+  const d = await res.json();
+  renderFastStats(d);
+}
+
+async function pollStatsSlow(){
+  const res = await fetch('/api/stats/slow', {cache:'no-store'});
+  if (!res.ok) throw new Error('bad status');
+  const d = await res.json();
+  renderSlowStats(d);
 }
 
 /* ========== POLL: USB Disks ========== */
@@ -1018,21 +1029,31 @@ async function pollTransmission(){
 }
 
 /* ========== MAIN LOOP ========== */
-let offlineCount = 0;
+let fastOfflineCount = 0;
 
-async function poll(){
+async function pollFast(){
   try{
-    await Promise.all([pollStats(), pollUSB(), pollSamba(), pollTransmission()]);
-    offlineCount = 0;
+    await pollStatsFast();
+    fastOfflineCount = 0;
     document.getElementById('offline').style.display = 'none';
   }catch(e){
-    offlineCount++;
-    if (offlineCount >= 3) document.getElementById('offline').style.display = 'block';
+    fastOfflineCount++;
+    if (fastOfflineCount >= 3) document.getElementById('offline').style.display = 'block';
   }
 }
 
-poll();
-setInterval(poll, 2000);
+async function pollSlow(){
+  try{
+    await Promise.all([pollStatsSlow(), pollUSB(), pollSamba(), pollTransmission()]);
+  }catch(e){
+    // Slow sections may fail independently; keep fast loop alive.
+  }
+}
+
+pollFast();
+pollSlow();
+setInterval(pollFast, 2000);
+setInterval(pollSlow, 10000);
 window.addEventListener('resize', () => {
   drawSpark(document.getElementById('spark-cpu'), buffers.cpu, '#4fd1c5');
   drawSpark(document.getElementById('spark-mem'), buffers.mem, '#4fd1c5');
