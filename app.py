@@ -74,7 +74,8 @@ def stats():
 
 @app.route("/")
 def index():
-    return send_from_directory("static", "static/index.html")
+    return send_from_directory("static", "index.html")
+
 
 
 if __name__ == "__main__":
