@@ -135,6 +135,48 @@
   .loadavg .l-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
   .loadavg .l-val{font-size:16px;font-weight:700;}
 
+  .section-head{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;
+  }
+  .section-head .hint{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;
+  }
+  .mini-card{
+    background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:12px 12px;
+  }
+  .mini-title{font-family:var(--mono);font-size:12px;font-weight:600;margin-bottom:6px;}
+  .mini-line{font-size:11px;color:var(--muted);line-height:1.5;}
+  .mini-line b{color:var(--text);}
+  .mini-sep{height:1px;background:var(--border);margin:8px 0;}
+  .ok{color:#30d158;}
+  .warn{color:var(--warn);}
+
+  .io-row{
+    display:grid;grid-template-columns:130px 1fr 1fr 110px;gap:8px;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;font-family:var(--mono);
+  }
+  .io-row:last-child{border-bottom:none;}
+  .io-h{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .io-speed{color:var(--text);}
+  .io-total{color:var(--muted);text-align:right;}
+  @media (max-width:760px){
+    .io-row{grid-template-columns:100px 1fr 1fr;}
+    .io-row .io-total{display:none;}
+  }
+
+  .iface-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .iface-card{
+    background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:12px;
+  }
+  .iface-name{
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:8px;
+  }
+  .iface-state{font-size:10px;text-transform:uppercase;letter-spacing:.06em;}
+  .iface-meta{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;}
+
   .offline{
     text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;
     margin-top:40px;
@@ -296,6 +338,39 @@
     </div>
   </div>
 
+  <div class="panel">
+    <div class="section-head">
+      <h2 style="margin:0">Производительность дисков I/O</h2>
+      <span class="hint">Активные устройства</span>
+    </div>
+    <div class="io-row io-h">
+      <span>Диск</span><span>Чтение</span><span>Запись</span><span class="io-total">Всего I/O</span>
+    </div>
+    <div id="io-list">
+      <div class="mini-line">загрузка…</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-head">
+      <h2 style="margin:0">Физические диски и разделы</h2>
+      <span class="hint">Список блочных устройств</span>
+    </div>
+    <div class="cards-grid" id="physical-list">
+      <div class="mini-line">загрузка…</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-head">
+      <h2 style="margin:0">Сетевые интерфейсы</h2>
+      <span class="hint">Без loopback</span>
+    </div>
+    <div class="iface-grid" id="iface-list">
+      <div class="mini-line">загрузка…</div>
+    </div>
+  </div>
+
   <hr class="section-divider">
 
   <!-- USB Disks -->
@@ -402,6 +477,14 @@ function fmtSpeed(v){
   if (v == null) return '–';
   return fmtBytesPerSec(v);
 }
+function escHtml(v){
+  return String(v ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
 
 function drawSpark(canvas, data, color){
   if (!canvas) return;
@@ -477,6 +560,71 @@ function renderCores(perCore){
   });
 }
 
+function renderDiskIO(rows){
+  const wrap = document.getElementById('io-list');
+  if (!rows || rows.length === 0){
+    wrap.innerHTML = '<div class="mini-line">Нет данных по дискам</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(r => `
+    <div class="io-row">
+      <span>${escHtml(r.name)}</span>
+      <span class="io-speed">${fmtBytesPerSec(r.read_bps || 0)}</span>
+      <span class="io-speed">${fmtBytesPerSec(r.write_bps || 0)}</span>
+      <span class="io-total">${fmtBytes((r.read_total || 0) + (r.write_total || 0))}</span>
+    </div>
+  `).join('');
+}
+
+function renderPhysicalDisks(rows){
+  const wrap = document.getElementById('physical-list');
+  if (!rows || rows.length === 0){
+    wrap.innerHTML = '<div class="mini-line">Физические диски не обнаружены</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(d => {
+    const smartClass = d.smart === 'passed' ? 'ok' : 'warn';
+    const smartText = d.smart === 'passed' ? 'SMART: PASSED' : 'SMART: UNKNOWN';
+    const partitions = (d.partitions || []).map(p => {
+      const usage = p.usage
+        ? `${fmtBytes(p.usage.used)} / ${fmtBytes(p.usage.total)} (${Math.round(p.usage.percent)}%)`
+        : 'не смонтирован';
+      const fs = p.fstype || '—';
+      const mount = p.mountpoint || '—';
+      return `<div class="mini-line">• ${escHtml(p.device)} (${escHtml(fs)}) @ ${escHtml(mount)}<br><b>${escHtml(usage)}</b></div>`;
+    }).join('<div class="mini-sep"></div>') || '<div class="mini-line">Разделы не найдены</div>';
+
+    return `<div class="mini-card">
+      <div class="mini-title">${escHtml(d.name)} — ${escHtml(d.model || d.name)}</div>
+      <div class="mini-line">${fmtBytes(d.size)} · ${d.removable ? 'Съемный' : 'Постоянный'}</div>
+      <div class="mini-line ${smartClass}">${smartText}</div>
+      <div class="mini-sep"></div>
+      ${partitions}
+    </div>`;
+  }).join('');
+}
+
+function renderInterfaces(rows){
+  const wrap = document.getElementById('iface-list');
+  if (!rows || rows.length === 0){
+    wrap.innerHTML = '<div class="mini-line">Активные интерфейсы не найдены</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(i => `
+    <div class="iface-card">
+      <div class="iface-name">
+        <span>${escHtml(i.name)}</span>
+        <span class="iface-state ${i.is_up ? 'ok' : 'warn'}">${i.is_up ? 'UP' : 'DOWN'}</span>
+      </div>
+      <div class="iface-meta">IPv4: ${escHtml(i.ipv4 || '—')}</div>
+      <div class="iface-meta">MAC: ${escHtml(i.mac || '—')}</div>
+      <div class="iface-meta">RX: ${fmtBytesPerSec(i.rx_bps || 0)} · TX: ${fmtBytesPerSec(i.tx_bps || 0)}</div>
+      <div class="iface-meta">Всего RX/TX: ${fmtBytes(i.rx_total || 0)} / ${fmtBytes(i.tx_total || 0)}</div>
+      <div class="iface-meta">MTU: ${escHtml(i.mtu || '—')} · ${escHtml(i.speed_mbps || 0)} Mb/s</div>
+    </div>
+  `).join('');
+}
+
 /* ========== POLL: System Stats ========== */
 async function pollStats(){
   const res = await fetch('/api/stats', {cache:'no-store'});
@@ -518,6 +666,10 @@ async function pollStats(){
   document.getElementById('l1').textContent = d.load1;
   document.getElementById('l5').textContent = d.load5;
   document.getElementById('l15').textContent = d.load15;
+
+  renderDiskIO(d.disk_io || []);
+  renderPhysicalDisks(d.physical_disks || []);
+  renderInterfaces(d.interfaces || []);
 }
 
 /* ========== POLL: USB Disks ========== */
