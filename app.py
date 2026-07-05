@@ -1,9 +1,9 @@
 """
-Pi Dashboard — минимальный бэкенд для лёгкого системного дашборда.
-Зависимости: Flask, psutil (см. requirements.txt).
-Никаких БД, очередей, фреймворков — один процесс, один эндпоинт.
+Pi Dashboard — Flask backend with Blueprint modules.
+Modules: system stats, USB disks, Samba, Transmission.
 """
 
+import json
 import os
 import socket
 import time
@@ -13,19 +13,24 @@ from flask import Flask, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+with open(CONFIG_PATH) as f:
+    config = json.load(f)
+
 
 @app.after_request
 def add_cors(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
-# Состояние для расчёта скорости сети (дельта между опросами)
+
 _net_prev = psutil.net_io_counters()
 _net_prev_time = time.time()
 
 
 def get_temp():
-    """Температура CPU. Сначала пробуем путь Raspberry Pi, потом psutil как фолбэк."""
     try:
         with open("/sys/class/thermal/thermal_zone0/temp") as f:
             return round(int(f.read().strip()) / 1000, 1)
@@ -36,7 +41,7 @@ def get_temp():
         for entries in temps.values():
             if entries:
                 return round(entries[0].current, 1)
-    except AttributeError:
+    except (AttributeError, OSError):
         pass
     return None
 
@@ -56,26 +61,24 @@ def stats():
     disk = psutil.disk_usage("/")
     load1, load5, load15 = os.getloadavg()
 
-    return jsonify(
-        {
-            "hostname": socket.gethostname(),
-            "cpu_percent": psutil.cpu_percent(interval=None),
-            "cpu_per_core": psutil.cpu_percent(interval=None, percpu=True),
-            "temp": get_temp(),
-            "mem_used": vm.used,
-            "mem_total": vm.total,
-            "mem_percent": vm.percent,
-            "disk_used": disk.used,
-            "disk_total": disk.total,
-            "disk_percent": disk.percent,
-            "load1": round(load1, 2),
-            "load5": round(load5, 2),
-            "load15": round(load15, 2),
-            "net_rx": net_rx,
-            "net_tx": net_tx,
-            "uptime": time.time() - psutil.boot_time(),
-        }
-    )
+    return jsonify({
+        "hostname": socket.gethostname(),
+        "cpu_percent": psutil.cpu_percent(interval=None),
+        "cpu_per_core": psutil.cpu_percent(interval=None, percpu=True),
+        "temp": get_temp(),
+        "mem_used": vm.used,
+        "mem_total": vm.total,
+        "mem_percent": vm.percent,
+        "disk_used": disk.used,
+        "disk_total": disk.total,
+        "disk_percent": disk.percent,
+        "load1": round(load1, 2),
+        "load5": round(load5, 2),
+        "load15": round(load15, 2),
+        "net_rx": net_rx,
+        "net_tx": net_tx,
+        "uptime": time.time() - psutil.boot_time(),
+    })
 
 
 @app.route("/")
@@ -83,7 +86,15 @@ def index():
     return send_from_directory("static", "index.html")
 
 
+from usb import usb_bp
+from samba import samba_bp
+from transmission import transmission_bp
+
+app.register_blueprint(usb_bp)
+app.register_blueprint(samba_bp)
+app.register_blueprint(transmission_bp)
+
 
 if __name__ == "__main__":
-    psutil.cpu_percent(percpu=True)  # прогрев счётчика, первый вызов всегда 0
-    app.run(host="0.0.0.0", port=5000)
+    psutil.cpu_percent(percpu=True)
+    app.run(host="0.0.0.0", port=config.get("port", 5000))

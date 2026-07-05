@@ -33,7 +33,6 @@
   }
   .wrap{max-width:1080px;margin:0 auto;}
 
-  /* header */
   .header{
     display:flex;align-items:center;justify-content:space-between;
     margin-bottom:24px;flex-wrap:wrap;gap:12px;
@@ -62,7 +61,6 @@
     100%{box-shadow:0 0 0 0 rgba(79,209,197,0);}
   }
 
-  /* grid */
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
   @media (max-width:760px){.grid{grid-template-columns:repeat(2,1fr);}}
 
@@ -89,13 +87,12 @@
   .card.warn .value{color:var(--warn);}
   .card.crit .value{color:var(--crit);}
 
-  /* wide cards */
   .row2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:14px;}
   @media (max-width:760px){.row2{grid-template-columns:1fr;}}
 
   .panel{
     background:var(--surface);border:1px solid var(--border);
-    border-radius:10px;padding:16px 18px;
+    border-radius:10px;padding:16px 18px;margin-bottom:14px;
   }
   .panel h2{
     font-size:11px;letter-spacing:.08em;text-transform:uppercase;
@@ -142,6 +139,101 @@
     text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;
     margin-top:40px;
   }
+
+  /* USB section */
+  .usb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  .usb-card{
+    background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;
+  }
+  .usb-card .usb-name{font-family:var(--mono);font-size:13px;font-weight:600;margin-bottom:6px;}
+  .usb-card .usb-meta{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+  .usb-card .usb-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin:8px 0;}
+  .usb-card .usb-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+  .usb-card .usb-actions{display:flex;gap:8px;margin-top:8px;}
+  .usb-empty{color:var(--muted);font-size:13px;font-style:italic;}
+
+  /* Samba section */
+  .samba-status{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .samba-dot{width:10px;height:10px;border-radius:50%;}
+  .samba-dot.on{background:#30d158;}
+  .samba-dot.off{background:var(--crit);}
+  .samba-status-text{font-family:var(--mono);font-size:12px;color:var(--muted);}
+
+  table.data-table{
+    width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;
+  }
+  table.data-table th{
+    text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:600;
+  }
+  table.data-table td{
+    padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+  }
+  table.data-table tr:last-child td{border-bottom:none;}
+
+  /* Transmission section */
+  .tr-summary{display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;}
+  .tr-stat{text-align:center;}
+  .tr-stat .tr-val{font-family:var(--mono);font-size:22px;font-weight:700;}
+  .tr-stat .tr-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+
+  .torrent-row{
+    display:grid;grid-template-columns:1fr 120px 80px 80px 50px 60px 90px;
+    gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);
+    font-size:12px;font-family:var(--mono);
+  }
+  @media (max-width:760px){
+    .torrent-row{grid-template-columns:1fr 80px 60px 60px;}
+    .torrent-row .tr-peers,.torrent-row .tr-eta,.torrent-row .tr-status{display:none;}
+  }
+  .torrent-row:last-child{border-bottom:none;}
+  .torrent-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tr-progress{display:flex;align-items:center;gap:6px;}
+  .tr-bar{flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
+  .tr-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+  .tr-bar-fill.dl{background:var(--accent);}
+  .tr-bar-fill.seed{background:#30d158;}
+  .tr-bar-fill.idle{background:var(--muted);}
+  .tr-speed{text-align:right;color:var(--muted);}
+  .tr-speed.dl{color:var(--accent);}
+  .tr-speed.ul{color:var(--warn);}
+  .tr-peers,.tr-eta,.tr-status{color:var(--muted);text-align:center;}
+  .tr-header{
+    display:grid;grid-template-columns:1fr 120px 80px 80px 50px 60px 90px;
+    gap:8px;padding:4px 0;border-bottom:1px solid var(--border);
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  }
+  @media (max-width:760px){
+    .tr-header{grid-template-columns:1fr 80px 60px 60px;}
+    .tr-header .th-peers,.tr-header .th-eta,.tr-header .th-status{display:none;}
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:5px 12px;border-radius:6px;border:1px solid var(--border);
+    background:var(--surface-alt);color:var(--text);font-family:var(--mono);
+    font-size:11px;cursor:pointer;transition:all .15s;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.danger:hover{border-color:var(--crit);color:var(--crit);}
+  .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  .btn.primary:hover{opacity:.85;}
+
+  /* Forms */
+  .form-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:10px;}
+  .form-group{display:flex;flex-direction:column;gap:4px;}
+  .form-group label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+  .form-group input{
+    padding:6px 10px;border-radius:6px;border:1px solid var(--border);
+    background:var(--surface-alt);color:var(--text);font-family:var(--mono);font-size:12px;
+  }
+  .form-group input:focus{outline:none;border-color:var(--accent);}
+  .form-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+  .form-check input[type=checkbox]{accent-color:var(--accent);}
+
+  .section-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
 </style>
 </head>
 <body>
@@ -155,6 +247,7 @@
     <div class="status"><span class="dot"></span><span id="uptime">uptime —</span></div>
   </div>
 
+  <!-- System metrics -->
   <div class="grid">
     <div class="card" id="card-cpu">
       <span class="label">CPU</span>
@@ -203,6 +296,71 @@
     </div>
   </div>
 
+  <hr class="section-divider">
+
+  <!-- USB Disks -->
+  <div class="panel">
+    <h2>USB-диски</h2>
+    <div class="usb-grid" id="usb-list"><div class="usb-empty">загрузка…</div></div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Samba -->
+  <div class="panel">
+    <h2>Samba</h2>
+    <div class="samba-status">
+      <div class="samba-dot" id="samba-dot"></div>
+      <span class="samba-status-text" id="samba-status-text">—</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Шары</div>
+        <table class="data-table" id="samba-shares-table">
+          <thead><tr><th>Имя</th><th>Путь</th><th>R/O</th><th>Подкл.</th><th></th></tr></thead>
+          <tbody id="samba-shares"></tbody>
+        </table>
+        <div class="form-row" id="samba-add-form">
+          <div class="form-group"><label>Имя</label><input id="shr-name" placeholder="public"></div>
+          <div class="form-group"><label>Путь</label><input id="shr-path" placeholder="/mnt/data/share"></div>
+          <div class="form-check"><input type="checkbox" id="shr-ro"><label for="shr-ro">Только чтение</label></div>
+          <div class="form-check"><input type="checkbox" id="shr-guest"><label for="shr-guest">Гостевой</label></div>
+          <button class="btn primary" onclick="addSambaShare()">+ Добавить</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Активные подключения</div>
+        <table class="data-table">
+          <thead><tr><th>Сервис</th><th>PID</th><th>Клиент</th></tr></thead>
+          <tbody id="samba-conns"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Transmission -->
+  <div class="panel">
+    <h2>Transmission</h2>
+    <div id="tr-error" style="color:var(--crit);font-size:12px;font-family:var(--mono);margin-bottom:10px;display:none;"></div>
+    <div class="tr-summary" id="tr-summary">
+      <div class="tr-stat"><div class="tr-val" id="tr-active">–</div><div class="tr-lbl">Активных</div></div>
+      <div class="tr-stat"><div class="tr-val" id="tr-paused">–</div><div class="tr-lbl">На паузе</div></div>
+      <div class="tr-stat"><div class="tr-val" id="tr-total">–</div><div class="tr-lbl">Всего</div></div>
+      <div class="tr-stat"><div class="tr-val" id="tr-dl" style="color:var(--accent)">–</div><div class="tr-lbl">Загрузка</div></div>
+      <div class="tr-stat"><div class="tr-val" id="tr-ul" style="color:var(--warn)">–</div><div class="tr-lbl">Отдача</div></div>
+    </div>
+    <div class="tr-header">
+      <span>Название</span><span style="text-align:center">Прогресс</span>
+      <span style="text-align:right">↓ Скорость</span><span style="text-align:right">↑ Скорость</span>
+      <span style="text-align:center" class="th-peers">Пиры</span>
+      <span style="text-align:center" class="th-eta">ETA</span>
+      <span style="text-align:center" class="th-status">Статус</span>
+    </div>
+    <div id="tr-torrents"><div style="color:var(--muted);font-size:12px;padding:8px 0;">загрузка…</div></div>
+  </div>
+
   <div class="offline" id="offline" style="display:none">соединение с сервером потеряно — переподключение…</div>
 </div>
 
@@ -222,6 +380,7 @@ function fmtBytesPerSec(v){
   return v.toFixed(0) + ' B/s';
 }
 function fmtBytes(v){
+  if (v == null) return '–';
   const gb = v / (1024**3);
   if (gb >= 1) return gb.toFixed(1) + ' GB';
   return (v/(1024**2)).toFixed(0) + ' MB';
@@ -231,6 +390,17 @@ function fmtUptime(sec){
   if (d > 0) return `${d}д ${h}ч`;
   if (h > 0) return `${h}ч ${m}м`;
   return `${m}м`;
+}
+function fmtETA(sec){
+  if (sec == null || sec < 0) return '–';
+  if (sec === 0) return 'Готово';
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60);
+  if (h > 0) return `${h}ч ${m}м`;
+  return `${m}м`;
+}
+function fmtSpeed(v){
+  if (v == null) return '–';
+  return fmtBytesPerSec(v);
 }
 
 function drawSpark(canvas, data, color){
@@ -307,50 +477,278 @@ function renderCores(perCore){
   });
 }
 
+/* ========== POLL: System Stats ========== */
+async function pollStats(){
+  const res = await fetch('/api/stats', {cache:'no-store'});
+  if (!res.ok) throw new Error('bad status');
+  const d = await res.json();
+
+  document.getElementById('hostname').textContent = d.hostname;
+  document.getElementById('uptime').textContent = 'uptime ' + fmtUptime(d.uptime);
+  document.getElementById('v-uptime').textContent = fmtUptime(d.uptime);
+
+  document.getElementById('v-cpu').textContent = d.cpu_percent.toFixed(0);
+  document.getElementById('v-mem').textContent = d.mem_percent.toFixed(0);
+  document.getElementById('v-temp').textContent = d.temp != null ? d.temp.toFixed(1) : '–';
+
+  setCardLevel('card-cpu', d.cpu_percent, 70, 90);
+  setCardLevel('card-mem', d.mem_percent, 75, 90);
+  if (d.temp != null) setCardLevel('card-temp', d.temp, 65, 75);
+
+  pushBuf('cpu', d.cpu_percent);
+  pushBuf('mem', d.mem_percent);
+  pushBuf('temp', d.temp || 0);
+  pushBuf('rx', d.net_rx);
+  pushBuf('tx', d.net_tx);
+
+  drawSpark(document.getElementById('spark-cpu'), buffers.cpu, '#4fd1c5');
+  drawSpark(document.getElementById('spark-mem'), buffers.mem, '#4fd1c5');
+  drawSpark(document.getElementById('spark-temp'), buffers.temp, '#f5a623');
+  drawNet(document.getElementById('net-canvas'), buffers.rx, buffers.tx);
+
+  document.getElementById('v-rx').textContent = fmtBytesPerSec(d.net_rx);
+  document.getElementById('v-tx').textContent = fmtBytesPerSec(d.net_tx);
+
+  renderCores(d.cpu_per_core);
+
+  document.getElementById('disk-fill').style.width = d.disk_percent + '%';
+  document.getElementById('disk-used').textContent = `${fmtBytes(d.disk_used)} / ${fmtBytes(d.disk_total)}`;
+  document.getElementById('disk-pct').textContent = d.disk_percent.toFixed(0) + '%';
+
+  document.getElementById('l1').textContent = d.load1;
+  document.getElementById('l5').textContent = d.load5;
+  document.getElementById('l15').textContent = d.load15;
+}
+
+/* ========== POLL: USB Disks ========== */
+async function pollUSB(){
+  try{
+    const res = await fetch('/api/usb', {cache:'no-store'});
+    if (!res.ok) throw new Error('bad status');
+    const data = await res.json();
+    const list = document.getElementById('usb-list');
+
+    if (!data.devices || data.devices.length === 0){
+      list.innerHTML = '<div class="usb-empty">USB-устройства не обнаружены</div>';
+      return;
+    }
+
+    list.innerHTML = data.devices.map(d => {
+      const pct = d.percent != null ? d.percent : 0;
+      const sizeStr = d.size ? fmtBytes(d.size) : '–';
+      const label = d.label || d.name;
+      const model = d.model || '';
+      const fs = d.fstype || '–';
+      const mountInfo = d.mounted ? `${d.mountpoint}` : 'не смонтирован';
+      const usedStr = d.used != null ? `${fmtBytes(d.used)} / ${fmtBytes(d.total)}` : '';
+
+      return `<div class="usb-card">
+        <div class="usb-name">${label}</div>
+        <div class="usb-meta">
+          ${model ? model + '<br>' : ''}
+          ${sizeStr} &middot; ${fs} &middot; ${d.device}<br>
+          ${mountInfo}${usedStr ? ' — ' + usedStr : ''}
+        </div>
+        ${d.mounted ? `<div class="usb-bar"><div class="usb-bar-fill" style="width:${pct}%"></div></div>` : ''}
+        <div class="usb-actions">
+          ${d.mounted
+            ? `<button class="btn danger" onclick="usbUnmount('${d.device}')">Отмонтировать</button>`
+            : `<button class="btn primary" onclick="usbMount('${d.device}')">Монтировать</button>`
+          }
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('usb-list').innerHTML = '<div class="usb-empty">ошибка загрузки</div>';
+  }
+}
+
+async function usbMount(device){
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '…';
+  try{
+    const res = await fetch('/api/usb/mount', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({device: device})
+    });
+    const data = await res.json();
+    if (data.error) alert('Ошибка: ' + data.error);
+  }catch(e){ alert('Ошибка сети'); }
+  pollUSB();
+}
+
+async function usbUnmount(device){
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '…';
+  try{
+    const res = await fetch('/api/usb/unmount', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({device: device})
+    });
+    const data = await res.json();
+    if (data.error) alert('Ошибка: ' + data.error);
+  }catch(e){ alert('Ошибка сети'); }
+  pollUSB();
+}
+
+/* ========== POLL: Samba ========== */
+async function pollSamba(){
+  try{
+    const [statusRes, sharesRes, connsRes] = await Promise.all([
+      fetch('/api/samba/status', {cache:'no-store'}),
+      fetch('/api/samba/shares', {cache:'no-store'}),
+      fetch('/api/samba/connections', {cache:'no-store'}),
+    ]);
+
+    const status = await statusRes.json();
+    const dot = document.getElementById('samba-dot');
+    const txt = document.getElementById('samba-status-text');
+    dot.className = 'samba-dot ' + (status.active ? 'on' : 'off');
+    txt.textContent = status.active ? `smbd работает (PID ${status.pid})` : 'smbd остановлен';
+
+    const sharesData = await sharesRes.json();
+    const tbody = document.getElementById('samba-shares');
+    const shares = Object.values(sharesData.shares || {});
+    if (shares.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Нет шар</td></tr>';
+    } else {
+      tbody.innerHTML = shares.map(s => `<tr>
+        <td>${s.name}</td>
+        <td>${s.path || '–'}</td>
+        <td>${(s['read only'] || '').toLowerCase() === 'yes' ? 'Да' : 'Нет'}</td>
+        <td>${s.active_connections || 0}</td>
+        <td><button class="btn danger" onclick="deleteSambaShare('${s.name}')">Удалить</button></td>
+      </tr>`).join('');
+    }
+
+    const connsData = await connsRes.json();
+    const connsTbody = document.getElementById('samba-conns');
+    const conns = connsData.connections || [];
+    if (conns.length === 0){
+      connsTbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted)">Нет подключений</td></tr>';
+    } else {
+      connsTbody.innerHTML = conns.map(c => `<tr>
+        <td>${c.service}</td><td>${c.pid}</td><td>${c.machine}</td>
+      </tr>`).join('');
+    }
+  }catch(e){
+    document.getElementById('samba-status-text').textContent = 'недоступен';
+    document.getElementById('samba-dot').className = 'samba-dot off';
+  }
+}
+
+async function addSambaShare(){
+  const name = document.getElementById('shr-name').value.trim();
+  const path = document.getElementById('shr-path').value.trim();
+  if (!name || !path){ alert('Укажите имя и путь'); return; }
+
+  try{
+    const res = await fetch('/api/samba/shares', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, path,
+        read_only: document.getElementById('shr-ro').checked,
+        guest_ok: document.getElementById('shr-guest').checked,
+      })
+    });
+    const data = await res.json();
+    if (data.error) alert('Ошибка: ' + data.error);
+    else {
+      document.getElementById('shr-name').value = '';
+      document.getElementById('shr-path').value = '';
+      document.getElementById('shr-ro').checked = false;
+      document.getElementById('shr-guest').checked = false;
+    }
+  }catch(e){ alert('Ошибка сети'); }
+  pollSamba();
+}
+
+async function deleteSambaShare(name){
+  if (!confirm(`Удалить шару "${name}"?`)) return;
+  try{
+    const res = await fetch(`/api/samba/shares/${encodeURIComponent(name)}`, {method:'DELETE'});
+    const data = await res.json();
+    if (data.error) alert('Ошибка: ' + data.error);
+  }catch(e){ alert('Ошибка сети'); }
+  pollSamba();
+}
+
+/* ========== POLL: Transmission ========== */
+async function pollTransmission(){
+  try{
+    const [statsRes, torrentsRes] = await Promise.all([
+      fetch('/api/transmission/stats', {cache:'no-store'}),
+      fetch('/api/transmission/torrents', {cache:'no-store'}),
+    ]);
+
+    const stats = await statsRes.json();
+    const errEl = document.getElementById('tr-error');
+    if (stats.error){
+      errEl.textContent = 'Transmission: ' + stats.error;
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    document.getElementById('tr-active').textContent = stats.active;
+    document.getElementById('tr-paused').textContent = stats.paused;
+    document.getElementById('tr-total').textContent = stats.total;
+    document.getElementById('tr-dl').textContent = fmtSpeed(stats.download_speed);
+    document.getElementById('tr-ul').textContent = fmtSpeed(stats.upload_speed);
+
+    const torrentsData = await torrentsRes.json();
+    const container = document.getElementById('tr-torrents');
+
+    if (torrentsData.error){
+      container.innerHTML = `<div style="color:var(--crit);font-size:12px;">${torrentsData.error}</div>`;
+      return;
+    }
+
+    const torrents = torrentsData.torrents || [];
+    if (torrents.length === 0){
+      container.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0;">Нет торрентов</div>';
+      return;
+    }
+
+    container.innerHTML = torrents.map(t => {
+      const pct = Math.round((t.percent_done || 0) * 100);
+      const isDownloading = t.status === 4;
+      const isSeeding = t.status === 6;
+      const barClass = isDownloading ? 'dl' : isSeeding ? 'seed' : 'idle';
+      const statusLabels = {0:'Стоп', 1:'Ожидание', 2:'Проверка', 3:'Ожидание', 4:'Загрузка', 5:'Ожидание', 6:'Раздача'};
+      const name = t.name || 'Без названия';
+      const errorStr = t.error ? ` (${t.error_string || 'ошибка'})` : '';
+
+      return `<div class="torrent-row">
+        <div class="torrent-name" title="${name}${errorStr}">${name}${errorStr}</div>
+        <div class="tr-progress">
+          <div class="tr-bar"><div class="tr-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+          <span>${pct}%</span>
+        </div>
+        <div class="tr-speed dl">${fmtSpeed(t.rate_download)}</div>
+        <div class="tr-speed ul">${fmtSpeed(t.rate_upload)}</div>
+        <div class="tr-peers">${t.peers_sending_to_us || 0}/${t.peers_connected || 0}</div>
+        <div class="tr-eta">${fmtETA(t.eta)}</div>
+        <div class="tr-status">${statusLabels[t.status] || '–'}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('tr-error').textContent = 'Transmission: соединение потеряно';
+    document.getElementById('tr-error').style.display = 'block';
+  }
+}
+
+/* ========== MAIN LOOP ========== */
+let offlineCount = 0;
+
 async function poll(){
   try{
-    const res = await fetch('/api/stats', {cache:'no-store'});
-    if (!res.ok) throw new Error('bad status');
-    const d = await res.json();
+    await Promise.all([pollStats(), pollUSB(), pollSamba(), pollTransmission()]);
+    offlineCount = 0;
     document.getElementById('offline').style.display = 'none';
-
-    document.getElementById('hostname').textContent = d.hostname;
-    document.getElementById('uptime').textContent = 'uptime ' + fmtUptime(d.uptime);
-    document.getElementById('v-uptime').textContent = fmtUptime(d.uptime);
-
-    document.getElementById('v-cpu').textContent = d.cpu_percent.toFixed(0);
-    document.getElementById('v-mem').textContent = d.mem_percent.toFixed(0);
-    document.getElementById('v-temp').textContent = d.temp != null ? d.temp.toFixed(1) : '–';
-
-    setCardLevel('card-cpu', d.cpu_percent, 70, 90);
-    setCardLevel('card-mem', d.mem_percent, 75, 90);
-    if (d.temp != null) setCardLevel('card-temp', d.temp, 65, 75);
-
-    pushBuf('cpu', d.cpu_percent);
-    pushBuf('mem', d.mem_percent);
-    pushBuf('temp', d.temp || 0);
-    pushBuf('rx', d.net_rx);
-    pushBuf('tx', d.net_tx);
-
-    drawSpark(document.getElementById('spark-cpu'), buffers.cpu, '#4fd1c5');
-    drawSpark(document.getElementById('spark-mem'), buffers.mem, '#4fd1c5');
-    drawSpark(document.getElementById('spark-temp'), buffers.temp, '#f5a623');
-    drawNet(document.getElementById('net-canvas'), buffers.rx, buffers.tx);
-
-    document.getElementById('v-rx').textContent = fmtBytesPerSec(d.net_rx);
-    document.getElementById('v-tx').textContent = fmtBytesPerSec(d.net_tx);
-
-    renderCores(d.cpu_per_core);
-
-    document.getElementById('disk-fill').style.width = d.disk_percent + '%';
-    document.getElementById('disk-used').textContent = `${fmtBytes(d.disk_used)} / ${fmtBytes(d.disk_total)}`;
-    document.getElementById('disk-pct').textContent = d.disk_percent.toFixed(0) + '%';
-
-    document.getElementById('l1').textContent = d.load1;
-    document.getElementById('l5').textContent = d.load5;
-    document.getElementById('l15').textContent = d.load15;
   }catch(e){
-    document.getElementById('offline').style.display = 'block';
+    offlineCount++;
+    if (offlineCount >= 3) document.getElementById('offline').style.display = 'block';
   }
 }
 

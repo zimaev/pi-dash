@@ -1,2 +1,4 @@
-flask
-psutil
+flask>=3.0,<4.0
+psutil>=5.9,<6.0
+gunicorn>=22.0,<24.0
+transmission-rpc>=7.0,<8.0
