@@ -2,8 +2,8 @@
     "transmission": {
         "host": "localhost",
         "port": 9091,
-        "username": "",
-        "password": ""
+        "username": "root",
+        "password": "admin"
     },
     "samba": {
         "config_path": "/etc/samba/smb.conf"
