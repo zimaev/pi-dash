@@ -29,9 +29,45 @@
     color:var(--text);
     font-family:var(--sans);
     min-height:100vh;
-    padding:28px 20px 60px;
+    padding:20px 16px 40px;
   }
-  .wrap{max-width:1080px;margin:0 auto;}
+  .layout{
+    max-width:1320px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:16px;
+    align-items:start;
+  }
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .wrap{min-width:0;}
+
+  .side{
+    position:sticky;top:14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+  }
+  @media (max-width:980px){
+    .side{position:static;}
+  }
+  .side-title{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:10px;
+  }
+  .menu{display:flex;flex-direction:column;gap:6px;}
+  .menu a{
+    display:block;text-decoration:none;
+    padding:8px 10px;border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:var(--mono);font-size:12px;background:var(--surface-alt);
+  }
+  .menu a:hover{border-color:var(--accent);color:var(--accent);}
+  @media (max-width:980px){
+    .menu{flex-direction:row;flex-wrap:wrap;}
+  }
 
   .header{
     display:flex;align-items:center;justify-content:space-between;
@@ -276,167 +312,194 @@
   .form-check input[type=checkbox]{accent-color:var(--accent);}
 
   .section-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+  .section-title{
+    margin:0 0 12px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="layout">
+  <aside class="side">
+    <div class="side-title">Меню</div>
+    <nav class="menu">
+      <a href="#section-cpu">1) CPU</a>
+      <a href="#section-storage">2) Storage</a>
+      <a href="#section-network">3) Network</a>
+      <a href="#section-transmission">4) Transmission</a>
+    </nav>
+  </aside>
 
-  <div class="header">
-    <div class="brand">
-      <span class="eyebrow">pi-dash</span>
-      <h1 id="hostname">—</h1>
-    </div>
-    <div class="status"><span class="dot"></span><span id="uptime">uptime —</span></div>
-  </div>
-
-  <!-- System metrics -->
-  <div class="grid">
-    <div class="card" id="card-cpu">
-      <span class="label">CPU</span>
-      <div class="value"><span id="v-cpu">–</span><span class="unit">%</span></div>
-      <canvas class="spark" id="spark-cpu"></canvas>
-    </div>
-    <div class="card" id="card-mem">
-      <span class="label">Память</span>
-      <div class="value"><span id="v-mem">–</span><span class="unit">%</span></div>
-      <canvas class="spark" id="spark-mem"></canvas>
-    </div>
-    <div class="card" id="card-temp">
-      <span class="label">Температура</span>
-      <div class="value"><span id="v-temp">–</span><span class="unit">°C</span></div>
-      <canvas class="spark" id="spark-temp"></canvas>
-    </div>
-    <div class="card" id="card-uptime">
-      <span class="label">Аптайм</span>
-      <div class="value"><span id="v-uptime">–</span></div>
-    </div>
-  </div>
-
-  <div class="row2">
-    <div class="panel">
-      <h2>Ядра CPU</h2>
-      <div class="cores" id="cores"></div>
-    </div>
-    <div class="panel">
-      <h2>Сеть</h2>
-      <div class="net-graph"><canvas id="net-canvas"></canvas></div>
-      <div class="net-legend">
-        <span><span class="swatch" style="background:var(--accent)"></span>вход <b id="v-rx">0 KB/s</b></span>
-        <span><span class="swatch" style="background:var(--warn)"></span>выход <b id="v-tx">0 KB/s</b></span>
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <span class="eyebrow">pi-dash</span>
+        <h1 id="hostname">—</h1>
       </div>
+      <div class="status"><span class="dot"></span><span id="uptime">uptime —</span></div>
     </div>
-  </div>
 
-  <div class="panel">
-    <h2>Диск</h2>
-    <div class="diskbar-track"><div class="diskbar-fill" id="disk-fill" style="width:0%"></div></div>
-    <div class="foot-row"><span id="disk-used">–</span><span id="disk-pct">–</span></div>
-    <div class="loadavg">
-      <div><div class="l-label">Load 1m</div><div class="l-val" id="l1">–</div></div>
-      <div><div class="l-label">Load 5m</div><div class="l-val" id="l5">–</div></div>
-      <div><div class="l-label">Load 15m</div><div class="l-val" id="l15">–</div></div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="section-head">
-      <h2 style="margin:0">Производительность дисков I/O</h2>
-      <span class="hint">Активные устройства</span>
-    </div>
-    <div class="io-row io-h">
-      <span>Диск</span><span>Чтение</span><span>Запись</span><span class="io-total">Всего I/O</span>
-    </div>
-    <div id="io-list">
-      <div class="mini-line">загрузка…</div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="section-head">
-      <h2 style="margin:0">Физические диски и разделы</h2>
-      <span class="hint">Список блочных устройств</span>
-    </div>
-    <div class="cards-grid" id="physical-list">
-      <div class="mini-line">загрузка…</div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="section-head">
-      <h2 style="margin:0">Сетевые интерфейсы</h2>
-      <span class="hint">Без loopback</span>
-    </div>
-    <div class="iface-grid" id="iface-list">
-      <div class="mini-line">загрузка…</div>
-    </div>
-  </div>
-
-  <hr class="section-divider">
-
-  <!-- USB Disks -->
-  <div class="panel">
-    <h2>USB-диски</h2>
-    <div class="usb-grid" id="usb-list"><div class="usb-empty">загрузка…</div></div>
-  </div>
-
-  <hr class="section-divider">
-
-  <!-- Samba -->
-  <div class="panel">
-    <h2>Samba</h2>
-    <div class="samba-status">
-      <div class="samba-dot" id="samba-dot"></div>
-      <span class="samba-status-text" id="samba-status-text">—</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Шары</div>
-        <table class="data-table" id="samba-shares-table">
-          <thead><tr><th>Имя</th><th>Путь</th><th>R/O</th><th>Подкл.</th><th></th></tr></thead>
-          <tbody id="samba-shares"></tbody>
-        </table>
-        <div class="form-row" id="samba-add-form">
-          <div class="form-group"><label>Имя</label><input id="shr-name" placeholder="public"></div>
-          <div class="form-group"><label>Путь</label><input id="shr-path" placeholder="/mnt/data/share"></div>
-          <div class="form-check"><input type="checkbox" id="shr-ro"><label for="shr-ro">Только чтение</label></div>
-          <div class="form-check"><input type="checkbox" id="shr-guest"><label for="shr-guest">Гостевой</label></div>
-          <button class="btn primary" onclick="addSambaShare()">+ Добавить</button>
+    <section id="section-cpu">
+      <h3 class="section-title">CPU</h3>
+      <div class="grid">
+        <div class="card" id="card-cpu">
+          <span class="label">CPU</span>
+          <div class="value"><span id="v-cpu">–</span><span class="unit">%</span></div>
+          <canvas class="spark" id="spark-cpu"></canvas>
+        </div>
+        <div class="card" id="card-mem">
+          <span class="label">Память</span>
+          <div class="value"><span id="v-mem">–</span><span class="unit">%</span></div>
+          <canvas class="spark" id="spark-mem"></canvas>
+        </div>
+        <div class="card" id="card-temp">
+          <span class="label">Температура</span>
+          <div class="value"><span id="v-temp">–</span><span class="unit">°C</span></div>
+          <canvas class="spark" id="spark-temp"></canvas>
+        </div>
+        <div class="card" id="card-uptime">
+          <span class="label">Аптайм</span>
+          <div class="value"><span id="v-uptime">–</span></div>
         </div>
       </div>
-      <div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Активные подключения</div>
-        <table class="data-table">
-          <thead><tr><th>Сервис</th><th>PID</th><th>Клиент</th></tr></thead>
-          <tbody id="samba-conns"></tbody>
-        </table>
+
+      <div class="row2">
+        <div class="panel">
+          <h2>Ядра CPU</h2>
+          <div class="cores" id="cores"></div>
+        </div>
+        <div class="panel">
+          <h2>Load Average</h2>
+          <div class="loadavg">
+            <div><div class="l-label">Load 1m</div><div class="l-val" id="l1">–</div></div>
+            <div><div class="l-label">Load 5m</div><div class="l-val" id="l5">–</div></div>
+            <div><div class="l-label">Load 15m</div><div class="l-val" id="l15">–</div></div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section id="section-storage">
+      <h3 class="section-title">Storage</h3>
+      <div class="panel">
+        <h2>Основной диск</h2>
+        <div class="diskbar-track"><div class="diskbar-fill" id="disk-fill" style="width:0%"></div></div>
+        <div class="foot-row"><span id="disk-used">–</span><span id="disk-pct">–</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <h2 style="margin:0">Производительность дисков I/O</h2>
+          <span class="hint">Активные устройства</span>
+        </div>
+        <div class="io-row io-h">
+          <span>Диск</span><span>Чтение</span><span>Запись</span><span class="io-total">Всего I/O</span>
+        </div>
+        <div id="io-list">
+          <div class="mini-line">загрузка…</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <h2 style="margin:0">Физические диски и разделы</h2>
+          <span class="hint">Список блочных устройств</span>
+        </div>
+        <div class="cards-grid" id="physical-list">
+          <div class="mini-line">загрузка…</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>USB-диски</h2>
+        <div class="usb-grid" id="usb-list"><div class="usb-empty">загрузка…</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Samba</h2>
+        <div class="samba-status">
+          <div class="samba-dot" id="samba-dot"></div>
+          <span class="samba-status-text" id="samba-status-text">—</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Шары</div>
+            <table class="data-table" id="samba-shares-table">
+              <thead><tr><th>Имя</th><th>Путь</th><th>R/O</th><th>Подкл.</th><th></th></tr></thead>
+              <tbody id="samba-shares"></tbody>
+            </table>
+            <div class="form-row" id="samba-add-form">
+              <div class="form-group"><label>Имя</label><input id="shr-name" placeholder="public"></div>
+              <div class="form-group"><label>Путь</label><input id="shr-path" placeholder="/mnt/data/share"></div>
+              <div class="form-check"><input type="checkbox" id="shr-ro"><label for="shr-ro">Только чтение</label></div>
+              <div class="form-check"><input type="checkbox" id="shr-guest"><label for="shr-guest">Гостевой</label></div>
+              <button class="btn primary" onclick="addSambaShare()">+ Добавить</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Активные подключения</div>
+            <table class="data-table">
+              <thead><tr><th>Сервис</th><th>PID</th><th>Клиент</th></tr></thead>
+              <tbody id="samba-conns"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section id="section-network">
+      <h3 class="section-title">Network</h3>
+      <div class="panel">
+        <h2>Сеть (Realtime)</h2>
+        <div class="net-graph"><canvas id="net-canvas"></canvas></div>
+        <div class="net-legend">
+          <span><span class="swatch" style="background:var(--accent)"></span>вход <b id="v-rx">0 KB/s</b></span>
+          <span><span class="swatch" style="background:var(--warn)"></span>выход <b id="v-tx">0 KB/s</b></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <h2 style="margin:0">Сетевые интерфейсы</h2>
+          <span class="hint">Без loopback</span>
+        </div>
+        <div class="iface-grid" id="iface-list">
+          <div class="mini-line">загрузка…</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section id="section-transmission">
+      <h3 class="section-title">Transmission</h3>
+      <div class="panel">
+        <h2>Transmission</h2>
+        <div id="tr-error" style="color:var(--crit);font-size:12px;font-family:var(--mono);margin-bottom:10px;display:none;"></div>
+        <div class="tr-summary" id="tr-summary">
+          <div class="tr-stat"><div class="tr-val" id="tr-active">–</div><div class="tr-lbl">Активных</div></div>
+          <div class="tr-stat"><div class="tr-val" id="tr-paused">–</div><div class="tr-lbl">На паузе</div></div>
+          <div class="tr-stat"><div class="tr-val" id="tr-total">–</div><div class="tr-lbl">Всего</div></div>
+          <div class="tr-stat"><div class="tr-val" id="tr-dl" style="color:var(--accent)">–</div><div class="tr-lbl">Загрузка</div></div>
+          <div class="tr-stat"><div class="tr-val" id="tr-ul" style="color:var(--warn)">–</div><div class="tr-lbl">Отдача</div></div>
+        </div>
+        <div class="tr-header">
+          <span>Название</span><span style="text-align:center">Прогресс</span>
+          <span style="text-align:right">↓ Скорость</span><span style="text-align:right">↑ Скорость</span>
+          <span style="text-align:center" class="th-peers">Пиры</span>
+          <span style="text-align:center" class="th-eta">ETA</span>
+          <span style="text-align:center" class="th-status">Статус</span>
+        </div>
+        <div id="tr-torrents"><div style="color:var(--muted);font-size:12px;padding:8px 0;">загрузка…</div></div>
+      </div>
+    </section>
+
+    <div class="offline" id="offline" style="display:none">соединение с сервером потеряно — переподключение…</div>
   </div>
-
-  <hr class="section-divider">
-
-  <!-- Transmission -->
-  <div class="panel">
-    <h2>Transmission</h2>
-    <div id="tr-error" style="color:var(--crit);font-size:12px;font-family:var(--mono);margin-bottom:10px;display:none;"></div>
-    <div class="tr-summary" id="tr-summary">
-      <div class="tr-stat"><div class="tr-val" id="tr-active">–</div><div class="tr-lbl">Активных</div></div>
-      <div class="tr-stat"><div class="tr-val" id="tr-paused">–</div><div class="tr-lbl">На паузе</div></div>
-      <div class="tr-stat"><div class="tr-val" id="tr-total">–</div><div class="tr-lbl">Всего</div></div>
-      <div class="tr-stat"><div class="tr-val" id="tr-dl" style="color:var(--accent)">–</div><div class="tr-lbl">Загрузка</div></div>
-      <div class="tr-stat"><div class="tr-val" id="tr-ul" style="color:var(--warn)">–</div><div class="tr-lbl">Отдача</div></div>
-    </div>
-    <div class="tr-header">
-      <span>Название</span><span style="text-align:center">Прогресс</span>
-      <span style="text-align:right">↓ Скорость</span><span style="text-align:right">↑ Скорость</span>
-      <span style="text-align:center" class="th-peers">Пиры</span>
-      <span style="text-align:center" class="th-eta">ETA</span>
-      <span style="text-align:center" class="th-status">Статус</span>
-    </div>
-    <div id="tr-torrents"><div style="color:var(--muted);font-size:12px;padding:8px 0;">загрузка…</div></div>
-  </div>
-
-  <div class="offline" id="offline" style="display:none">соединение с сервером потеряно — переподключение…</div>
 </div>
 
 <script>
