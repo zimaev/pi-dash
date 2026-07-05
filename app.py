@@ -33,6 +33,8 @@ _net_pernic_prev = psutil.net_io_counters(pernic=True)
 _net_pernic_prev_time = time.time()
 _disk_io_prev = psutil.disk_io_counters(perdisk=True)
 _io_prev_time = time.time()
+_proc_cpu_prev = {}
+_proc_total_cpu_prev = sum(psutil.cpu_times())
 
 
 def _safe_read_text(path):
@@ -195,6 +197,59 @@ def _collect_interfaces(now):
     return rows
 
 
+def _collect_top_processes():
+    global _proc_cpu_prev, _proc_total_cpu_prev
+
+    total_cpu_now = sum(psutil.cpu_times())
+    total_delta = max(total_cpu_now - _proc_total_cpu_prev, 0.0001)
+    cpu_count = max(psutil.cpu_count() or 1, 1)
+
+    cpu_rows = []
+    mem_rows = []
+    next_prev = {}
+
+    for proc in psutil.process_iter(["pid", "name", "username", "memory_info", "cpu_times"]):
+        try:
+            info = proc.info
+            pid = info["pid"]
+            name = info["name"] or "unknown"
+            username = info.get("username") or "unknown"
+            mem_info = info.get("memory_info")
+            rss = mem_info.rss if mem_info else 0
+
+            cpu_times = info.get("cpu_times")
+            proc_cpu_total = 0.0
+            if cpu_times:
+                proc_cpu_total = float(cpu_times.user + cpu_times.system)
+            prev_proc_total = _proc_cpu_prev.get(pid, proc_cpu_total)
+            proc_delta = max(proc_cpu_total - prev_proc_total, 0.0)
+            cpu_percent = (proc_delta / total_delta) * 100.0 * cpu_count
+            cpu_percent = min(max(cpu_percent, 0.0), 100.0 * cpu_count)
+            next_prev[pid] = proc_cpu_total
+
+            row = {
+                "pid": pid,
+                "name": name,
+                "username": username,
+                "cpu_percent": cpu_percent,
+                "memory_rss": rss,
+            }
+            cpu_rows.append(row)
+            mem_rows.append(row)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
+            continue
+
+    _proc_cpu_prev = next_prev
+    _proc_total_cpu_prev = total_cpu_now
+
+    cpu_rows.sort(key=lambda p: p["cpu_percent"], reverse=True)
+    mem_rows.sort(key=lambda p: p["memory_rss"], reverse=True)
+    return {
+        "cpu": cpu_rows[:5],
+        "memory": mem_rows[:5],
+    }
+
+
 def get_temp():
     try:
         with open("/sys/class/thermal/thermal_zone0/temp") as f:
@@ -228,6 +283,7 @@ def stats():
     disk_io = _collect_disk_io(now)
     interfaces = _collect_interfaces(now)
     physical_disks = _collect_physical_disks()
+    top_processes = _collect_top_processes()
 
     return jsonify({
         "hostname": socket.gethostname(),
@@ -249,6 +305,7 @@ def stats():
         "disk_io": disk_io,
         "interfaces": interfaces,
         "physical_disks": physical_disks,
+        "top_processes": top_processes,
     })
 
 

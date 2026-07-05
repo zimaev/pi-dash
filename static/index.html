@@ -212,6 +212,24 @@
   }
   .iface-state{font-size:10px;text-transform:uppercase;letter-spacing:.06em;}
   .iface-meta{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;}
+  .proc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:760px){.proc-grid{grid-template-columns:1fr;}}
+  .proc-box{
+    background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+  }
+  .proc-title{
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 8px;font-weight:600;
+  }
+  .proc-row{
+    display:grid;grid-template-columns:1fr 70px 76px;gap:8px;align-items:center;
+    padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;
+  }
+  .proc-row:last-child{border-bottom:none;}
+  .proc-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .proc-cpu{text-align:right;color:var(--accent);}
+  .proc-mem{text-align:right;color:var(--muted);}
+  .proc-empty{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
   .offline{
     text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;
@@ -374,6 +392,20 @@
             <div><div class="l-label">Load 1m</div><div class="l-val" id="l1">–</div></div>
             <div><div class="l-label">Load 5m</div><div class="l-val" id="l5">–</div></div>
             <div><div class="l-label">Load 15m</div><div class="l-val" id="l15">–</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>TOP 5 процессов</h2>
+        <div class="proc-grid">
+          <div class="proc-box">
+            <h4 class="proc-title">По CPU</h4>
+            <div id="top-proc-cpu"><div class="proc-empty">загрузка…</div></div>
+          </div>
+          <div class="proc-box">
+            <h4 class="proc-title">По памяти (RSS)</h4>
+            <div id="top-proc-mem"><div class="proc-empty">загрузка…</div></div>
           </div>
         </div>
       </div>
@@ -688,6 +720,37 @@ function renderInterfaces(rows){
   `).join('');
 }
 
+function renderTopProcesses(top){
+  const cpuWrap = document.getElementById('top-proc-cpu');
+  const memWrap = document.getElementById('top-proc-mem');
+  const cpuRows = top?.cpu || [];
+  const memRows = top?.memory || [];
+
+  if (cpuRows.length === 0){
+    cpuWrap.innerHTML = '<div class="proc-empty">Нет данных</div>';
+  } else {
+    cpuWrap.innerHTML = cpuRows.map(p => `
+      <div class="proc-row">
+        <span class="proc-name" title="${escHtml(p.name)} (${escHtml(p.pid)})">${escHtml(p.name)} [${escHtml(p.pid)}]</span>
+        <span class="proc-cpu">${(p.cpu_percent || 0).toFixed(1)}%</span>
+        <span class="proc-mem">${fmtBytes(p.memory_rss || 0)}</span>
+      </div>
+    `).join('');
+  }
+
+  if (memRows.length === 0){
+    memWrap.innerHTML = '<div class="proc-empty">Нет данных</div>';
+  } else {
+    memWrap.innerHTML = memRows.map(p => `
+      <div class="proc-row">
+        <span class="proc-name" title="${escHtml(p.name)} (${escHtml(p.pid)})">${escHtml(p.name)} [${escHtml(p.pid)}]</span>
+        <span class="proc-cpu">${(p.cpu_percent || 0).toFixed(1)}%</span>
+        <span class="proc-mem">${fmtBytes(p.memory_rss || 0)}</span>
+      </div>
+    `).join('');
+  }
+}
+
 /* ========== POLL: System Stats ========== */
 async function pollStats(){
   const res = await fetch('/api/stats', {cache:'no-store'});
@@ -733,6 +796,7 @@ async function pollStats(){
   renderDiskIO(d.disk_io || []);
   renderPhysicalDisks(d.physical_disks || []);
   renderInterfaces(d.interfaces || []);
+  renderTopProcesses(d.top_processes || {});
 }
 
 /* ========== POLL: USB Disks ========== */
