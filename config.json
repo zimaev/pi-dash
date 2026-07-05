@@ -1,0 +1,13 @@
+{
+    "transmission": {
+        "host": "localhost",
+        "port": 9091,
+        "username": "",
+        "password": ""
+    },
+    "samba": {
+        "config_path": "/etc/samba/smb.conf"
+    },
+    "polling_interval_ms": 2000,
+    "port": 5000
+}

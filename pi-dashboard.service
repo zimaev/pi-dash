@@ -1,0 +1,17 @@
+[Unit]
+Description=Pi Dashboard - System Monitoring Panel
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pi-dashboard
+ExecStart=/opt/pi-dashboard/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:5000 app:app
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=FLASK_ENV=production
+
+[Install]
+WantedBy=multi-user.target
