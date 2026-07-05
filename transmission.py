@@ -29,7 +29,7 @@ def transmission_stats():
     try:
         c = _get_client()
         session = c.get_session()
-        stats = c.get_session_stats()
+        stats = c.session_stats()
         return jsonify({
             "active": stats.active_torrent_count,
             "paused": stats.paused_torrent_count,
