@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>pi-dash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1417;
+    --surface:#171d21;
+    --surface-alt:#1e262b;
+    --border:#263138;
+    --text:#e7edf0;
+    --muted:#7c8a91;
+    --accent:#4fd1c5;
+    --accent-dim:rgba(79,209,197,0.15);
+    --warn:#f5a623;
+    --crit:#e5484d;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --sans:'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* header */
+  .header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:24px;flex-wrap:wrap;gap:12px;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    color:var(--accent);text-transform:uppercase;
+  }
+  .brand h1{
+    font-family:var(--mono);font-size:20px;font-weight:700;margin:0;
+    color:var(--text);
+  }
+  .status{
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 0 var(--accent-dim);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(79,209,197,.5);}
+    70%{box-shadow:0 0 0 8px rgba(79,209,197,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,209,197,0);}
+  }
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
+  @media (max-width:760px){.grid{grid-template-columns:repeat(2,1fr);}}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card .label{
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:8px;display:block;
+  }
+  .card .value{
+    font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;
+    display:flex;align-items:baseline;gap:4px;
+  }
+  .card .value .unit{font-size:14px;font-weight:500;color:var(--muted);}
+  .card canvas.spark{
+    position:absolute;left:0;right:0;bottom:0;width:100%;height:34px;opacity:.55;
+  }
+  .card.warn .value{color:var(--warn);}
+  .card.crit .value{color:var(--crit);}
+
+  /* wide cards */
+  .row2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:14px;}
+  @media (max-width:760px){.row2{grid-template-columns:1fr;}}
+
+  .panel{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:16px 18px;
+  }
+  .panel h2{
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 14px;font-weight:600;
+  }
+
+  .cores{display:flex;flex-direction:column;gap:8px;}
+  .core-row{display:flex;align-items:center;gap:10px;}
+  .core-row .idx{
+    font-family:var(--mono);font-size:11px;color:var(--muted);width:26px;
+  }
+  .core-row .bar-track{
+    flex:1;height:8px;border-radius:4px;background:var(--surface-alt);overflow:hidden;
+  }
+  .core-row .bar-fill{
+    height:100%;background:var(--accent);border-radius:4px;
+    transition:width .4s ease;
+  }
+  .core-row .pct{
+    font-family:var(--mono);font-size:11px;color:var(--muted);width:34px;text-align:right;
+  }
+
+  .net-graph{position:relative;height:120px;}
+  .net-legend{display:flex;gap:18px;margin-top:10px;font-family:var(--mono);font-size:11px;}
+  .net-legend span{display:flex;align-items:center;gap:6px;color:var(--muted);}
+  .swatch{width:8px;height:8px;border-radius:2px;}
+
+  .diskbar-track{
+    height:14px;border-radius:7px;background:var(--surface-alt);overflow:hidden;margin:10px 0 8px;
+  }
+  .diskbar-fill{
+    height:100%;background:linear-gradient(90deg,var(--accent),#3fb8ad);
+    transition:width .4s ease;
+  }
+  .foot-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);}
+
+  .loadavg{display:flex;gap:22px;margin-top:14px;}
+  .loadavg div{font-family:var(--mono);}
+  .loadavg .l-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+  .loadavg .l-val{font-size:16px;font-weight:700;}
+
+  .offline{
+    text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;
+    margin-top:40px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <span class="eyebrow">pi-dash</span>
+      <h1 id="hostname">—</h1>
+    </div>
+    <div class="status"><span class="dot"></span><span id="uptime">uptime —</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card" id="card-cpu">
+      <span class="label">CPU</span>
+      <div class="value"><span id="v-cpu">–</span><span class="unit">%</span></div>
+      <canvas class="spark" id="spark-cpu"></canvas>
+    </div>
+    <div class="card" id="card-mem">
+      <span class="label">Память</span>
+      <div class="value"><span id="v-mem">–</span><span class="unit">%</span></div>
+      <canvas class="spark" id="spark-mem"></canvas>
+    </div>
+    <div class="card" id="card-temp">
+      <span class="label">Температура</span>
+      <div class="value"><span id="v-temp">–</span><span class="unit">°C</span></div>
+      <canvas class="spark" id="spark-temp"></canvas>
+    </div>
+    <div class="card" id="card-uptime">
+      <span class="label">Аптайм</span>
+      <div class="value"><span id="v-uptime">–</span></div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="panel">
+      <h2>Ядра CPU</h2>
+      <div class="cores" id="cores"></div>
+    </div>
+    <div class="panel">
+      <h2>Сеть</h2>
+      <div class="net-graph"><canvas id="net-canvas"></canvas></div>
+      <div class="net-legend">
+        <span><span class="swatch" style="background:var(--accent)"></span>вход <b id="v-rx">0 KB/s</b></span>
+        <span><span class="swatch" style="background:var(--warn)"></span>выход <b id="v-tx">0 KB/s</b></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Диск</h2>
+    <div class="diskbar-track"><div class="diskbar-fill" id="disk-fill" style="width:0%"></div></div>
+    <div class="foot-row"><span id="disk-used">–</span><span id="disk-pct">–</span></div>
+    <div class="loadavg">
+      <div><div class="l-label">Load 1m</div><div class="l-val" id="l1">–</div></div>
+      <div><div class="l-label">Load 5m</div><div class="l-val" id="l5">–</div></div>
+      <div><div class="l-label">Load 15m</div><div class="l-val" id="l15">–</div></div>
+    </div>
+  </div>
+
+  <div class="offline" id="offline" style="display:none">соединение с сервером потеряно — переподключение…</div>
+</div>
+
+<script>
+const HISTORY = 40;
+const buffers = { cpu: [], mem: [], temp: [], rx: [], tx: [] };
+
+function pushBuf(key, val){
+  const b = buffers[key];
+  b.push(val);
+  if (b.length > HISTORY) b.shift();
+}
+
+function fmtBytesPerSec(v){
+  if (v > 1024*1024) return (v/1024/1024).toFixed(1) + ' MB/s';
+  if (v > 1024) return (v/1024).toFixed(0) + ' KB/s';
+  return v.toFixed(0) + ' B/s';
+}
+function fmtBytes(v){
+  const gb = v / (1024**3);
+  if (gb >= 1) return gb.toFixed(1) + ' GB';
+  return (v/(1024**2)).toFixed(0) + ' MB';
+}
+function fmtUptime(sec){
+  const d = Math.floor(sec/86400), h = Math.floor((sec%86400)/3600), m = Math.floor((sec%3600)/60);
+  if (d > 0) return `${d}д ${h}ч`;
+  if (h > 0) return `${h}ч ${m}м`;
+  return `${m}м`;
+}
+
+function drawSpark(canvas, data, color){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  if (data.length < 2) return;
+  const max = Math.max(...data, 1);
+  const step = w / (HISTORY - 1);
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x = w - (data.length-1-i)*step;
+    const y = h - (v/max)*h*0.9 - 2;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.6;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+function drawNet(canvas, rx, tx){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const max = Math.max(...rx, ...tx, 1024);
+  const step = w / (HISTORY - 1);
+  const drawLine = (data, color, fill) => {
+    if (data.length < 2) return;
+    ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x = w - (data.length-1-i)*step;
+      const y = h - (v/max)*h*0.92 - 2;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.stroke();
+    if (fill){
+      ctx.lineTo(w, h); ctx.lineTo(w - (data.length-1)*step, h);
+      ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+    }
+  };
+  drawLine(rx, '#4fd1c5', 'rgba(79,209,197,0.10)');
+  drawLine(tx, '#f5a623', null);
+}
+
+function setCardLevel(id, pct, warnAt, critAt){
+  const el = document.getElementById(id);
+  el.classList.remove('warn','crit');
+  if (pct >= critAt) el.classList.add('crit');
+  else if (pct >= warnAt) el.classList.add('warn');
+}
+
+function renderCores(perCore){
+  const wrap = document.getElementById('cores');
+  if (wrap.children.length !== perCore.length){
+    wrap.innerHTML = perCore.map((_, i) => `
+      <div class="core-row">
+        <span class="idx">C${i}</span>
+        <div class="bar-track"><div class="bar-fill" id="core-${i}" style="width:0%"></div></div>
+        <span class="pct" id="core-pct-${i}">0%</span>
+      </div>`).join('');
+  }
+  perCore.forEach((v,i)=>{
+    document.getElementById(`core-${i}`).style.width = v + '%';
+    document.getElementById(`core-pct-${i}`).textContent = Math.round(v) + '%';
+  });
+}
+
+async function poll(){
+  try{
+    const res = await fetch('/api/stats', {cache:'no-store'});
+    if (!res.ok) throw new Error('bad status');
+    const d = await res.json();
+    document.getElementById('offline').style.display = 'none';
+
+    document.getElementById('hostname').textContent = d.hostname;
+    document.getElementById('uptime').textContent = 'uptime ' + fmtUptime(d.uptime);
+    document.getElementById('v-uptime').textContent = fmtUptime(d.uptime);
+
+    document.getElementById('v-cpu').textContent = d.cpu_percent.toFixed(0);
+    document.getElementById('v-mem').textContent = d.mem_percent.toFixed(0);
+    document.getElementById('v-temp').textContent = d.temp != null ? d.temp.toFixed(1) : '–';
+
+    setCardLevel('card-cpu', d.cpu_percent, 70, 90);
+    setCardLevel('card-mem', d.mem_percent, 75, 90);
+    if (d.temp != null) setCardLevel('card-temp', d.temp, 65, 75);
+
+    pushBuf('cpu', d.cpu_percent);
+    pushBuf('mem', d.mem_percent);
+    pushBuf('temp', d.temp || 0);
+    pushBuf('rx', d.net_rx);
+    pushBuf('tx', d.net_tx);
+
+    drawSpark(document.getElementById('spark-cpu'), buffers.cpu, '#4fd1c5');
+    drawSpark(document.getElementById('spark-mem'), buffers.mem, '#4fd1c5');
+    drawSpark(document.getElementById('spark-temp'), buffers.temp, '#f5a623');
+    drawNet(document.getElementById('net-canvas'), buffers.rx, buffers.tx);
+
+    document.getElementById('v-rx').textContent = fmtBytesPerSec(d.net_rx);
+    document.getElementById('v-tx').textContent = fmtBytesPerSec(d.net_tx);
+
+    renderCores(d.cpu_per_core);
+
+    document.getElementById('disk-fill').style.width = d.disk_percent + '%';
+    document.getElementById('disk-used').textContent = `${fmtBytes(d.disk_used)} / ${fmtBytes(d.disk_total)}`;
+    document.getElementById('disk-pct').textContent = d.disk_percent.toFixed(0) + '%';
+
+    document.getElementById('l1').textContent = d.load1;
+    document.getElementById('l5').textContent = d.load5;
+    document.getElementById('l15').textContent = d.load15;
+  }catch(e){
+    document.getElementById('offline').style.display = 'block';
+  }
+}
+
+poll();
+setInterval(poll, 2000);
+window.addEventListener('resize', () => {
+  drawSpark(document.getElementById('spark-cpu'), buffers.cpu, '#4fd1c5');
+  drawSpark(document.getElementById('spark-mem'), buffers.mem, '#4fd1c5');
+  drawSpark(document.getElementById('spark-temp'), buffers.temp, '#f5a623');
+  drawNet(document.getElementById('net-canvas'), buffers.rx, buffers.tx);
+});
+</script>
+</body>
+</html>
