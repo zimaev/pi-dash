@@ -13,6 +13,12 @@ from flask import Flask, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
+
+@app.after_request
+def add_cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
+
 # Состояние для расчёта скорости сети (дельта между опросами)
 _net_prev = psutil.net_io_counters()
 _net_prev_time = time.time()
