@@ -48,11 +48,12 @@ def transmission_stats():
 def transmission_torrents():
     try:
         c = _get_client()
+        # Transmission RPC expects camelCase field names in "arguments".
         torrents = c.get_torrents(arguments=[
-            "id", "name", "status", "percent_done",
-            "rate_download", "rate_upload", "eta", "total_size",
-            "peers_connected", "peers_sending_to_us",
-            "upload_ratio", "is_finished", "error", "error_string",
+            "id", "name", "status", "percentDone",
+            "rateDownload", "rateUpload", "eta", "totalSize",
+            "peersConnected", "peersSendingToUs",
+            "uploadRatio", "isFinished", "error", "errorString",
         ])
         result = []
         for t in torrents:
