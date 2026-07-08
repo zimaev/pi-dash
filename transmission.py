@@ -2,6 +2,7 @@
 
 import json
 import os
+from datetime import timedelta
 
 from flask import Blueprint, jsonify
 
@@ -12,6 +13,15 @@ with open(CONFIG_PATH) as f:
     _config = json.load(f)
 
 TR_CFG = _config.get("transmission", {})
+
+
+def _seconds(value):
+    """Convert timedelta from transmission-rpc to JSON-friendly seconds."""
+    if value is None:
+        return None
+    if isinstance(value, timedelta):
+        return int(value.total_seconds())
+    return value
 
 
 def _get_client():
@@ -64,7 +74,7 @@ def transmission_torrents():
                 "percent_done": t.percent_done,
                 "rate_download": t.rate_download,
                 "rate_upload": t.rate_upload,
-                "eta": t.eta,
+                "eta": _seconds(t.eta),
                 "total_size": t.total_size,
                 "peers_connected": t.peers_connected,
                 "peers_sending_to_us": t.peers_sending_to_us,
